@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Produto {
+  id         Int                @id @default(autoincrement())
+  nome       String
+  quantidade Int
+  unidade    String
+
+  retiradas  RetiradaProduto[] // ← relação com a tabela intermediária
+  entradas  EntradaProduto[] // ← relação com a tabela intermediária
+}
+
+model Tecnico {
+  id        Int        @id @default(autoincrement())
+  nome      String
+  retiradas Retirada[]
+}
+
+model Retirada {
+  id         Int               @id @default(autoincrement())
+  data       DateTime          @default(now())
+  tecnico    Tecnico           @relation(fields: [tecnicoId], references: [id])
+  tecnicoId  Int
+
+  produtos   RetiradaProduto[] // ← relação com a tabela intermediária
+}
+
+model RetiradaProduto {
+  id          Int      @id @default(autoincrement())
+
+  retirada    Retirada @relation(fields: [retiradaId], references: [id])
+  retiradaId  Int
+
+  produto     Produto  @relation(fields: [produtoId], references: [id])
+  produtoId   Int
+
+  quantidade  Int
+
+  tipo        String
+}
+
+model Entrada {
+  id         Int               @id @default(autoincrement())
+  data       DateTime          @default(now())
+  produtos   EntradaProduto[] // ← relação com a tabela intermediária
+}
+
+model EntradaProduto {
+  id          Int      @id @default(autoincrement())
+
+  entrada    Entrada @relation(fields: [entradaId], references: [id])
+  entradaId  Int
+
+  produto     Produto  @relation(fields: [produtoId], references: [id])
+  produtoId   Int
+
+  quantidade  Int
+
+  tipo        String
+}
+
+
+
+
